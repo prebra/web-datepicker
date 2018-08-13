@@ -29,3 +29,5 @@ npm run build
 |placeholder|String|选择日期时间|占位内容
 
 **选择后emit selected方法，传递参数date**
+
+![效果预览](https://github.com/prebra/web-datepicker/blob/master/src/assets/review.png)
