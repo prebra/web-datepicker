@@ -21,7 +21,7 @@ npm run build
 |value|null/Date/String/Number|-|默认显示日期
 |type|String|datetime|显示类型|datetime/date
 |limitRangeYear|Object|-|设置选择范围的年限eg.{from: number, to: munber}|
-|format|String|yyyy-MM-dd|显示在输入框中的格式|见日期格式
+|format|String|yyyy-MM-dd|显示在输入框中的格式|见[日期格式](#日期格式)
 |minuteStep|Number|1|分钟显示的间隔数
 |disabledDate|Function|-|设置不可选状态，必须返回Boolean
 |calendarStyle|Object|-|自定义时间选择面板样式，主要是设置位置
@@ -50,5 +50,5 @@ ww|星期|-|星期四
 
 **选择后emit selected方法，传递参数date**
 
-![效果预览](https://github.com/prebra/web-datepicker/blob/master/src/assets/review1.png)
-![效果预览](https://github.com/prebra/web-datepicker/blob/master/src/assets/review2.png)
+### 截图预览
+<img width="250px" height="370px" src="https://github.com/prebra/web-datepicker/blob/master/src/assets/review1.png"><img width="250px" height="370px" src="https://github.com/prebra/web-datepicker/blob/master/src/assets/review3.png"><img width="250px" height="370px" src="https://github.com/prebra/web-datepicker/blob/master/src/assets/review2.png">
