@@ -9,90 +9,92 @@
         </div>
         <div class="mask" v-if="showCalendar" @click="showCalendar=false"></div>
         <div class="web-datepicker-panel" v-if="showCalendar" :style="calendarStyle">
-            <div class="web-datepicker-header">
+            <div class="web-datepicker-header" v-if="type==='datetime'">
                 <span class="web-datepicker-date" :class="{'current-tab': curTab === 1}" @click="switchTab(1)">{{selectedDateStr}}</span>
                 <span class="web-datepicker-time" :class="{'current-tab': curTab === 2}" @click="switchTab(2)"> {{selectedTimeStr}}</span>
             </div>
-            <!-- 日历 -->
-            <div class="calendar-panel" v-if="curTab === 1 && showPanel === 1">
-                <div class="panel-header">
-                    <i class="arrow double-arrow" @click="previousYear">左</i>
-                    <i class="arrow single-arrow" @click="previousMonth">左</i>
-                    <p class="picker-date">
-                        <span class="year-tab" @click="selectYearPanel">{{pageDate.getFullYear()}}年</span>
-                        <span class="month-tab" @click="showPanel = 3"> {{pageDate.getMonth() + 1}}月</span>
-                    </p>
-                    <i class="arrow single-arrow left-single-arrow" @click="nextMonth">右</i>
-                    <i class="arrow double-arrow left-double-arrow" @click="nextYear">右</i>
+            <div class="web-datepicker-container">
+                <!-- 日历 -->
+                <div class="calendar-panel" v-if="curTab === 1 && showPanel === 1">
+                    <div class="panel-header">
+                        <i class="arrow double-arrow" @click="previousYear">&lt;&lt;</i>
+                        <i class="arrow single-arrow" @click="previousMonth">&lt;</i>
+                        <p class="picker-date">
+                            <span class="year-tab" @click="selectYearPanel">{{pageDate.getFullYear()}}年</span>
+                            <span class="month-tab" @click="showPanel = 3"> {{pageDate.getMonth() + 1}}月</span>
+                        </p>
+                        <i class="arrow single-arrow" @click="nextMonth">&gt;</i>
+                        <i class="arrow double-arrow" @click="nextYear">&gt;&gt;</i>
+                    </div>
+                    <ul class="calendar-content">
+                        <li class="cell day-header" v-for="day in daysOfWeek" :key="day">{{day}}</li>
+                        <li class="cell"
+                            v-for="day in showDays"
+                            :key="day.timestamp"
+                            :class="dayClasses(day)"
+                            @click="selectDate(day)">{{day.isToday ? '今天' : day.date}}
+                        </li>
+                    </ul>
                 </div>
-                <ul class="calendar-content">
-                    <li class="cell day-header" v-for="day in daysOfWeek" :key="day">{{day}}</li>
-                    <li class="cell"
-                        v-for="day in showDays"
-                        :key="day.timestamp"
-                        :class="dayClasses(day)"
-                        @click="selectDay(day)">{{day.isToday ? '今天' : day.date}}
-                    </li>
-                </ul>
-            </div>
-            <!-- 时分 -->
-            <div class="time-panel" v-if="curTab === 2">
-                <ul class="item-list" ref="hours">
-                    <li class="item"
-                        v-for="index in 24"
-                        :key="index"
-                        :class="{selected: new Date(selectedDate).getHours() === index - 1 }"
-                        @click="selectHours(index - 1)">
-                        {{index - 1}}
-                    </li>
-                </ul>
-                <ul class="item-list" ref="minutes">
-                    <li class="item"
-                        v-for="index in (Math.floor(60 / minuteStep))"
-                        :key="index"
-                        :class="{selected: new Date(selectedDate).getMinutes() === (index - 1) * minuteStep }"
-                        @click="selectMinutes((index - 1) * minuteStep, index)">
-                        {{(index - 1) * minuteStep}}
-                    </li>
-                </ul>
-            </div>
-            <!-- 选年 -->
-            <div class="year-panel" v-if="curTab === 1 && showPanel === 2">
-                <div class="panel-header">
-                    <i class="arrow double-arrow" @click="switchYearList(-1)"> 3 </i>
-                    <p class="picker-date">
-                        <span> {{rangeYear}} </span>
-                    </p>
-                    <i class="arrow double-arrow left-double-arrow" @click="switchYearList(1)"> 2 </i>
+                <!-- 时分 -->
+                <div class="time-panel" v-if="curTab === 2">
+                    <ul class="item-list" ref="hours">
+                        <li class="item"
+                            v-for="index in 24"
+                            :key="index"
+                            :class="{selected: new Date(selectedDate).getHours() === index - 1 }"
+                            @click="selectHours(index - 1)">
+                            {{index - 1}}
+                        </li>
+                    </ul>
+                    <ul class="item-list" ref="minutes">
+                        <li class="item"
+                            v-for="index in (Math.floor(60 / minuteStep))"
+                            :key="index"
+                            :class="{selected: new Date(selectedDate).getMinutes() === (index - 1) * minuteStep }"
+                            @click="selectMinutes((index - 1) * minuteStep, index)">
+                            {{(index - 1) * minuteStep}}
+                        </li>
+                    </ul>
                 </div>
-                <ul class="panel-list">
-                    <li class="panel-list-item" v-for="year in yearList" :key="year">
-                        <span class="item"
-                            :class="{'selected': year == new Date(selectedDate).getFullYear()}"
-                            @click="selectYear(year)">
-                            {{year}}
-                        </span>
-                    </li>
-                </ul>
-            </div>
-            <!-- 选月 -->
-            <div class="month-panel" v-if="curTab === 1 && showPanel === 3">
-                <div class="panel-header">
-                    <i class="arrow double-arrow" @click="previousYear"> 3 </i>
-                    <p class="picker-date">
-                        <span> {{pageDate.getFullYear()}}年 </span>
-                    </p>
-                    <i class="arrow double-arrow left-double-arrow" @click="nextYear"> >> </i>
+                <!-- 选年 -->
+                <div class="year-panel" v-if="curTab === 1 && showPanel === 2">
+                    <div class="panel-header">
+                        <i class="arrow double-arrow" @click="switchYearList(-1)">&lt;&lt;</i>
+                        <p class="picker-date">
+                            <span> {{rangeYear}} </span>
+                        </p>
+                        <i class="arrow double-arrow" @click="switchYearList(1)">>></i>
+                    </div>
+                    <ul class="panel-list">
+                        <li class="panel-list-item" v-for="year in yearList" :key="year">
+                            <span class="item"
+                                :class="{'selected': year == new Date(selectedDate).getFullYear()}"
+                                @click="selectYear(year)">
+                                {{year}}
+                            </span>
+                        </li>
+                    </ul>
                 </div>
-                <ul class="panel-list">
-                    <li class="panel-list-item" v-for="(val, index) in monthVal" :key="index">
-                        <span class="item"
-                            @click="selectMonth(index)"
-                            :class="{'selected': index === new Date(selectedDate).getMonth() && pageDate.getFullYear() === new Date(selectedDate).getFullYear()}">
-                            {{val}}
-                        </span>
-                    </li>
-                </ul>
+                <!-- 选月 -->
+                <div class="month-panel" v-if="curTab === 1 && showPanel === 3">
+                    <div class="panel-header">
+                        <i class="arrow double-arrow" @click="previousYear">&lt;</i>
+                        <p class="picker-date">
+                            <span> {{pageDate.getFullYear()}}年 </span>
+                        </p>
+                        <i class="arrow double-arrow" @click="nextYear">&gt;</i>
+                    </div>
+                    <ul class="panel-list">
+                        <li class="panel-list-item" v-for="(val, index) in monthVal" :key="index">
+                            <span class="item"
+                                @click="selectMonth(index)"
+                                :class="{'selected': index === new Date(selectedDate).getMonth() && pageDate.getFullYear() === new Date(selectedDate).getFullYear()}">
+                                {{val}}
+                            </span>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -133,14 +135,14 @@ export default {
                 return val === null || val instanceof Date || typeof val === 'string' || typeof val === 'number'
             }
         },
-        rangeStart: {
-            validator: (val) => {
-                return val === null || val instanceof Date || typeof val === 'string' || typeof val === 'number'
-            }
+        type: {
+            type: String,
+            default: 'date'
         },
-        rangeEnd: {
-            validator: (val) => {
-                return val === null || val instanceof Date || typeof val === 'string' || typeof val === 'number'
+        limitRangeYear: {
+            type: Object,
+            default () {
+                return {}
             }
         },
         format: {
@@ -151,7 +153,7 @@ export default {
             type: Number,
             default: 1
         },
-        disabledRange: Object,
+        disabledDate: Function,
         calendarStyle: {
             type: Object
         },
@@ -235,12 +237,12 @@ export default {
                     }
                 }, 20)
             }
+        },
+        showCalendar (val) {
+            if (!val) {
+                this.resetPanel()
+            }
         }
-        // showCalendar (val) {
-        //     if (!val) {
-        //         this.setDate(this.selectedDate)
-        //     }
-        // }
     },
     created () {
         console.log(this.value)
@@ -277,14 +279,14 @@ export default {
         },
 
         previousYear () {
-            if (this.pageDate.getFullYear() <= new Date(this.rangeStart).getFullYear()) {
+            if (this.limitRangeYear.from && this.pageDate.getFullYear() <= this.limitRangeYear.from) {
                 return
             }
             this.changeYear(this.pageDate.getFullYear() - 1)
         },
 
         nextYear () {
-            if (this.pageDate.getFullYear() >= new Date(this.rangeEnd).getFullYear()) {
+            if (this.limitRangeYear.to && this.pageDate.getFullYear() >= this.limitRangeYear.to) {
                 return
             }
             this.changeYear(this.pageDate.getFullYear() + 1)
@@ -306,17 +308,25 @@ export default {
             this.$emit('input', date)
             this.$emit('selected', date)
             this.userInput = date
+        },
+
+        resetPanel () {
             this.curTab = 1
             this.showPanel = 1
         },
 
-        selectDay (day) {
+        selectDate (day) {
             if (day.isDisabled) {
                 return
             }
             let { timestamp } = day
             this.selectedDate = new Date(util.setDate(this.selectedDate, timestamp))
-            this.curTab = 2
+            if (this.type === 'datetime') {
+                this.curTab = 2
+            } else if (this.type === 'date') {
+                this.setDate(this.selectedDate)
+                this.showCalendar = false
+            }
         },
 
         selectYearPanel () {
@@ -326,10 +336,10 @@ export default {
 
         switchYearList (flag) {
             let { start, end } = util.queryTenYearRange(this.curPanelStartYear)
-            if (flag === -1 && (new Date(this.rangeStart).getFullYear() > start || this.curPanelStartYear <= new Date(this.rangeStart).getFullYear())) {
+            if (flag === -1 && (this.limitRangeYear.from > start || this.curPanelStartYear <= this.limitRangeYear.from)) {
                 return
             }
-            if (flag === 1 && (new Date(this.rangeEnd).getFullYear() < end || this.curPanelEndYear >= new Date(this.rangeEnd).getFullYear())) {
+            if (flag === 1 && (this.limitRangeYear.to < end || this.curPanelEndYear >= this.limitRangeYear.to)) {
                 return
             }
             this._calculateYear(this.curPanelStartYear + flag * 10)
@@ -355,30 +365,12 @@ export default {
             this.selectedDate = new Date(this.selectedDate.setMinutes(min))
             let el = this.$refs.minutes
             this._scrollAnima(el, index - 1, true, 60 / this._scrollAnima)
-            this.$emit('input', this.selectedDate)
-            this.$emit('selected', this.selectedDate)
-            this.userInput = this.selectedDate
+            this.setDate(this.selectedDate)
             this.showCalendar = false
         },
 
         _isDisabledDate (date) {
-            let timestamp = date.setHours(23)
-            if (typeof this.disabledRange === 'undefined') {
-                return false
-            }
-            if (typeof this.disabledRange.from !== 'undefined') {
-                let fromTimestamp = new Date(this.disabledRange.from).getTime()
-                if (timestamp < fromTimestamp) {
-                    return true
-                }
-            }
-            if (typeof this.disabledRange.to !== 'undefined') {
-                let toTimestamp = new Date(this.disabledRange.to).getTime()
-                if (timestamp > toTimestamp) {
-                    return true
-                }
-            }
-            return false
+            return typeof this.disabledDate === 'function' && this.disabledDate(date)
         },
 
         _scrollAnima (el, dis, isAnimal = true, step = 10) {
@@ -403,13 +395,11 @@ export default {
 
         _calculateYear (year) {
             let { start, end } = util.queryTenYearRange(year)
-            let startYear = new Date(this.rangeStart).getFullYear()
-            let endYear = new Date(this.rangeEnd).getFullYear()
-            if (startYear > start) {
-                start = startYear
+            if (this.limitRangeYear.from > start) {
+                start = this.limitRangeYear.from
             }
-            if (endYear < end) {
-                end = endYear
+            if (this.limitRangeYear.to < end) {
+                end = this.limitRangeYear.to
             }
             this.curPanelStartYear = start
             this.curPanelEndYear = end
@@ -434,6 +424,7 @@ export default {
 }
 </script>
 <style lang="less">
+@primaryColor: #e63;
 ul, div, p {
     padding: 0;
     margin: 0;
@@ -468,11 +459,10 @@ ul, div, p {
         }
     }
     .web-datepicker-panel {
-        min-height: 325px;
         overflow: hidden;
         position: absolute;
         width: 272px;
-        padding: 20px 28px 18px 28px;
+        padding: 15px 28px;
         box-shadow: 0px 0px 6px 0px rgba(0,0,0,0.04),0px 2px 4px 0px rgba(0,0,0,0.12);
         border-radius: 2px;
         background: #fff;
@@ -495,7 +485,7 @@ ul, div, p {
             cursor: pointer;
             &.selected {
                 color: #fff;
-                background: #409eff;
+                background: @primaryColor;
                 border-radius:28px;
             }
             &:hover {
@@ -506,6 +496,7 @@ ul, div, p {
         .web-datepicker-header {
             display: flex;
             justify-content: center;
+            align-items: center;
             margin-bottom: 27px;
             color: #475669;
             font-size: 16px;
@@ -514,7 +505,7 @@ ul, div, p {
                 display: inline-block;
                 cursor: pointer;
                 &:hover {
-                    color: #409eff;
+                    color: @primaryColor;
                 }
             }
             .web-datepicker-time {
@@ -522,12 +513,12 @@ ul, div, p {
                 margin-left: 20px;
                 cursor: pointer;
                 &:hover {
-                    color: #409eff;
+                    color: @primaryColor;
                 }
             }
             .current-tab {
                 position: relative;
-                color: #409eff;
+                color: @primaryColor;
                 &::after {
                     content: "";
                     position: absolute;
@@ -536,128 +527,117 @@ ul, div, p {
                     left: 10%;
                     width: 80%;
                     height: 3px;
-                    background: #409eff;
+                    background: @primaryColor;
                     border-radius: 3px;
                 }
             }
         }
-        .panel-header {
-            display: flex;
-            margin: 20px 0 10px;
-            .picker-date {
-                flex: 1;
-                text-align: center;
-                font-size: 14px;
-                color: #475669;
-                .year-tab {
-                    padding-right: 10px;
-                }
-            }
-            .arrow {
-                width: 16px;
-                cursor: pointer;
-                text-indent: -1000px;
-            }
-            .double-arrow {
-                background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAYAAAByDd+UAAAB+0lEQVRIS+2VsUsbcRTHv89Ei0idLFQogoNDoJstqIXSO+ji4qAkoXTOCUKXbi3F6KBLpy7N2bFacqcuDrpI7iIKgoWmg5N/QLYOpRCk5p5c4M545J6XH+LkrZ/f733u937vvR/hjj+6Yx/uhR0z/rXsPE2lmQtz+ml0gcT8tV2ntGS7r4m9PTCdGXkt0y6UWLCuK+G3cjXjoXkCogGAPxo5fSUIJLH2n0osNH84Q0jhF4AnYGwaeS0bBJJYNOWJhF92dx/0/e0/JMIzALXzh42Jd9PT534wiXUqgERC03K2AMwCqCOdGjdmX9bD0wlMSWhalWWAPjHQ6CFMFbJa7UoWz+IGinhC0668AdNGq5yJZwpZfSeUCUyaXrHCku1OksdVEHqZeXE+ry8HgSR206iMF1pOnYDH0Yr0A5YEpiw0y5UjEE0BvGPk9Jn2QBJTF24fDOOi+RvAIwBLRk4rhvcnMGWhv3Gt7D5n8JF/j9GikZhS0YQFYjlvCfjeqS1KAlNqi7bm/gzgfUzjxzKlxvc3FYvcM5xx9wFo0dEmMWVha2auHw/2pRs/iTAWbRWJKQ3v8Amyq6NNr1kjokEGfZjPvVpNwpSep6v7dDVmb5+AYyOvv7jWn1Y8C9Ylei2iaTHtw5EL/P+zkNX+dcNaM/mmRr1tfi+87YziEje/JizFGrPcAAAAAElFTkSuQmCC) no-repeat;
-                background-size: cover;
-                &:hover {
-                    background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAYAAAByDd+UAAACDUlEQVRIS+2UsWsTcRTHv+9iY6E0TaBCCyJ06FBwU6HWpSWXlk4dCg7i3CYKLm6KWDvUxakgl9NRnHTqUsqlVMFCQcE4dPIPyGbuWqW0Oe/JBS8ex93r5deSyayf977f/N697yP0+Ec99sN/w9iJzxqHV1sZ8M7S4H60QGJ+bdcjLVbtkgZsAvhulfMTYUOJBXVdGeovDyco434GaACEx9Zyfi0Qklj4T6U2nDYPhvv491eALgN4Z5XztwMhiUVHnspwfp0vtrLOJwKuA6hfOBma3HxAx76YxOIWIJWhbtjvibAIcEOj7LWt5YFGZ5QCUzIsGc1VED1h5iPKYMpaKtQDIYklHRTxhbrp3CHmt+1mT1uw7uU2Oi8TmHS9Eg2L1YObBO8jAX0APbXKQ6uBkMROO5WJhrphN4gwEt1IX1BiyoYlo7kLoilm3qhVCgthIYkpG86Zv0Y9r/UNhEvM/KxWKawEYhJTNvQbi6+cG+Txbvs7RpZGYkpL01n9qnMX4DexsRCYUiz+5c1+AcLDuOCXjGSmFPx20wpr+ohTI2AmetpEFuOY6rT9vZk5N+t8ATAejcr8OicypeMdNM2+tsfY5TqIch7waLucf56GhU1Tv7BzZczmjOZRDeA9q1K4FRYrCiyo69qwfWnMoyuu2//jw336GR2ZxPxaJcPTwn2mHJ5FXD0W5+ja85H+AVGgLCxDONNSAAAAAElFTkSuQmCC) no-repeat;
-                    background-size: cover;    
-                }
-            }
-            .single-arrow {
-                margin-left: 13px;
-                background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAYAAAByDd+UAAABzElEQVRIS+3VPUgcQRQH8P/bUYNEBQvhytgoaWwUhCjiLSSiWFjtKpgiFu42BgKiYGWnRLBQ1PVECz/wdrFJClHEXfOBCBJiZRUCUTsLLYQrzvPJGs5CRGdP5iqnG3gzP97jvRlCnhfl2cMz+GjFE6vf3rAQJ5bRePRoMPC0kjpuMEjAKDNW7M54t1IwkQzamfA1RJjQZhvxDWXg3Nr3mkwms0dAMZgGrM7mMRksjIncpVNeEBOM3wTEACxbZvy9LBYZXFzcfJkqKtwFUQ2AfZyXNlhWXVoJODzMWuz1zgYBb5lxXKSJ2h6j6TQKFinDWdcfB+gTAxcgUW8bTYdRMWnQSe58IOKF/w3Jrb2mvpkLJgXOrAavNI3/ACQAHrRM/XOumBQ4/+VnaTqV/keEcgYN2WbziFIwvHzG9Rs0pgCEAiLu6DX0m4HPZUnPoeMG3QQsMZACiTqlTZPNxHH9CQL15WUsQtTzPHHGFVsA4soHP5vlxPJe2YvC1AGASuVPWxZNJH9UXdHlLwJKlD/et6jrt1wx1m/2jHd2l74t07XSXXrfZY4b9BMwxuBJ29Q/KgdDYNrzq8VZ2V/ZX+NJGcpkdDfmGcylag+euQYlxZUdSVzAzgAAAABJRU5ErkJggg==) no-repeat;
-                background-size: cover;
-                &:hover {
-                    background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAYAAAByDd+UAAABzUlEQVRIS+3VQUgUURgH8P9/diys1t297dEudvNSILQXbXcUxYOXbnrQy84GBYEkeOpWJHRQcgahDmWXjh4imVk8CCKE6KlTBGm3oNkZNorU+WQkO0Tkm5W3J99t4Hvvx/e973tDtHmxzR7OwVMrfmspumlIxxe/2rl7ajBwtpJabmMGwGMRee3XCuNawbITjZLxSoIIOFK3c++0geXFZi+5v0myU4gHfjU/p4IlMam7tP9Zs2gaB9skioAse3ZhQhVLDQ6+lMvx98YGyV4RvA+MXGmryn094EMxrGKY3JMFkb2fF83r61PZr2mwVBlWnPApKfdFpCk0++p29kNaTBmsuMEkwReSNKRw2K/lVlvBlMB+J+juID8CyEAw49XyT1rFlMDSc8le+hV+BlGIgdm6nX+kFUwOt5yoJIzXAJiMjTHvTtfxwLeylOfQcsNxQF6JyA+heUNr05xkUnGDeYJ32zIWCXr7jWSCb6FHYED/4P9Oc3heug4uhDsArmp/2k5KW16Kenh4uEXyivbH+899OuEQIW+Pv4lBz87XVbpWuUv/dVjFbUwTmBPIgm8X7mkHE2BgMboWZbKfVP8aZ8pQJaO/Y87BVqr23z1HdL+lHQFfmE4AAAAASUVORK5CYII=) no-repeat;
-                    background-size: cover;
-                }
-            }
-            .left-double-arrow, .left-single-arrow {
-                margin-left: 0;
-                transform: rotateZ(180deg);
-            }
-            .left-single-arrow {
-                margin-right: 13px;
-            }
-        }
-        .calendar-panel {
-            .picker-date {
-                span:hover {
-                    cursor: pointer;
-                    color: #409eff;
-                }
-            }
-            .calendar-content {
-                margin: 0 -10px;
-                .cell {
-                    display: inline-block;
-                    position: relative;
-                    width: 39px;
-                    height: 39px;
-                    margin-top: 4px;;
-                    border: 1px solid #fff;
+        .web-datepicker-container {
+            min-height: 300px;
+            .panel-header {
+                display: flex;
+                margin: 10px 0 10px;
+                .picker-date {
+                    flex: 1;
                     text-align: center;
                     font-size: 14px;
                     color: #475669;
-                    line-height: 39px;;
-                    cursor: pointer;
-                    &.today {
-                        color: #409eff;
+                    .year-tab {
+                        padding-right: 10px;
                     }
+                }
+                .arrow {
+                    width: 22px;
+                    font-style: normal;
+                    cursor: pointer;
+                    font-size: 12px;
+                    font-weight: lighter;
+                    text-align: center;
+                    letter-spacing: -3px;
+                    transform: scaleY(1.9);
+                    -webkit-transform: scaleY(1.9);
                     &:hover {
-                        background: #E5E9F2;
+                        color: @primaryColor;
+                    }
+                }
+            }
+            .calendar-panel {
+                .picker-date {
+                    span:hover {
+                        cursor: pointer;
+                        color: @primaryColor;
+                    }
+                }
+                .calendar-content {
+                    margin: 0 -10px;
+                    .cell {
+                        display: inline-block;
+                        position: relative;
+                        width: 37px;
+                        height: 37px;
+                        margin-top: 4px;;
+                        border: 2px solid #fff;
+                        text-align: center;
+                        font-size: 14px;
                         color: #475669;
+                        line-height: 37px;;
+                        cursor: pointer;
+                        &.today {
+                            color: @primaryColor;
+                        }
+                        &:hover {
+                            background: #E5E9F2;
+                            color: #475669;
+                            border-radius: 50%;
+                        }
+                    }
+                    .selected {
+                        background: @primaryColor;
+                        color: #fff !important;
                         border-radius: 50%;
                     }
-                }
-                .selected {
-                    background: #409eff;
-                    color: #fff !important;
-                    border-radius: 50%;
-                }
-                .disabled, .gray {
-                    color: #C2CBD0 !important;
-                }
-                .disabled:hover {
-                    background: #fff;
-                    color: #C2CBD0;
-                }
-                .day-header {
-                    font-size: 12px;
-                    color: #8492A6;
-                    cursor: inherit;
-                    &:hover {
+                    .disabled, .gray {
+                        color: #C2CBD0 !important;
+                    }
+                    .disabled:hover {
+                        cursor: not-allowed;
                         background: #fff;
+                        color: #C2CBD0;
+                    }
+                    .day-header {
+                        font-size: 12px;
                         color: #8492A6;
+                        cursor: inherit;
+                        &:hover {
+                            background: #fff;
+                            color: #8492A6;
+                        }
                     }
                 }
             }
-        }
-        .time-panel {
-            display: flex;
-            margin: 22px 36px 0;
-            .item-list {
-                flex: 1;
-                height: 268px;
-                overflow-y: auto;
-                overflow-x: hidden;
-                text-align: center;
-                .item {
-                    margin-left: 2px;
+            .time-panel {
+                display: flex;
+                margin: 22px 36px 0;
+                .item-list {
+                    flex: 1;
+                    height: 268px;
+                    overflow-y: auto;
+                    overflow-x: hidden;
+                    text-align: center;
+                    .item {
+                        margin-left: 2px;
+                    }
+                    // display: flex;
+                    // flex-direction: column;
+                    // align-items: center;
                 }
-                // display: flex;
-                // flex-direction: column;
-                // align-items: center;
             }
-        }
-        .panel-list-item {
-            width: 33.33%;
-            margin-top: 16px;
-            display: inline-block;
-            text-align: center;
+            .panel-list-item {
+                width: 33.33%;
+                margin-top: 25px;
+                display: inline-block;
+                text-align: center;
+            }
         }
     }
 }

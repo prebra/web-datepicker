@@ -16,17 +16,37 @@ npm run build
 ```
 
 ## props
-|props|类型|默认值|说明|
-|:---|:---|:---|:---|
+|props|类型|默认值|说明|可选值|
+|:---|:---|:---|:---|:---|
 |value|null/Date/String/Number|-|默认显示日期
-|rangeStart|null/Date/String/Number|-|选择范围的开始日期 只限制年 月|
-|rangeEnd|null/Date/String/Number|-|选择范围的结束日期 只限制年 月|
-|format|String|yyyy-MM-dd|显示在输入框中的格式
+|type|String|datetime|显示类型|datetime/date
+|limitRangeYear|Object|-|设置选择范围的年限eg.{from: number, to: munber}|
+|format|String|yyyy-MM-dd|显示在输入框中的格式|见日期格式
 |minuteStep|Number|1|分钟显示的间隔数
-|disabledRange|Object|-|不可选日期范围 eg.{from: date\|timestamp, to: date\|timestamp}
+|disabledDate|Function|-|设置不可选状态，必须返回Boolean
 |calendarStyle|Object|-|自定义时间选择面板样式，主要是设置位置
 |inputStyle|Object|-|自定义时间显示input框样式
 |placeholder|String|选择日期时间|占位内容
+
+## 日期格式
+#### 使用format设置输入框格式。以2018年8月9日 05:06:03 星期四为例格式化
+|格式|含义|说明|举例
+|:--|:--|:--|:--|
+yyyy|年|-|2018
+yy|年-2000|年缩写|18
+M|月|不补0|8
+MM|月|-|08
+d|日|不补0|8
+dd|日|-|08
+h|小时|不补0|5
+hh|小时|-|05
+m|分钟|不补0|6
+mm|分钟|-|06
+s|秒|不补0|3
+ss|秒|-|03
+w|周|-|周四
+ww|星期|-|星期四
+
 
 **选择后emit selected方法，传递参数date**
 
