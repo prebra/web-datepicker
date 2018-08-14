@@ -50,4 +50,5 @@ ww|星期|-|星期四
 
 **选择后emit selected方法，传递参数date**
 
-![效果预览](https://github.com/prebra/web-datepicker/blob/master/src/assets/review.png)
+![效果预览](https://github.com/prebra/web-datepicker/blob/master/src/assets/review1.png)
+![效果预览](https://github.com/prebra/web-datepicker/blob/master/src/assets/review2.png)
